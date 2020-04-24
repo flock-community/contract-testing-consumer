@@ -1,10 +1,10 @@
 package community.flock.contracttestingconsumer.zoo.adapter;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import community.flock.contracttestingconsumer.ResourceNotFoundException;
 import community.flock.contracttestingconsumer.zoo.adapter.dto.MammalRequestDTO;
 import community.flock.contracttestingconsumer.zoo.adapter.dto.ZooDto;
-import community.flock.contracttestingconsumer.zoo.adapter.dto.ZoosDto;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.DisposableBean;
@@ -19,6 +19,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.List;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
@@ -43,18 +44,19 @@ public class ZooProducerHttpClient implements DisposableBean {
 
     }
 
-    public ZoosDto getZooInfo() throws IOException, InterruptedException {
-        var uri = fromUriString(baseUrl + "/zoos").build().toUri();
+    public List<ZooDto> getZooInfo() throws IOException, InterruptedException {
+        var uri = fromUriString(baseUrl + "/zoo").build().toUri();
 
         var request = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(Duration.ofSeconds(4))
-                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
                 .GET()
                 .build();
 
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        var zoo = objectMapper.readValue(response.body(), ZoosDto.class);
+        TypeReference<List<ZooDto>> typeReference = new TypeReference<>() {};
+        var zoo = objectMapper.readValue(response.body(), typeReference);
         System.out.println(response.statusCode());
         System.out.println(response.body());
         System.out.println(zoo);

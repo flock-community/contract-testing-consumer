@@ -1,7 +1,6 @@
 package community.flock.contracttestingconsumer.zoo;
 
 import community.flock.contracttestingconsumer.zoo.domain.Zoo;
-import community.flock.contracttestingconsumer.zoo.domain.Zoos;
 import community.flock.contracttestingconsumer.zoo.response.ZooResponse;
 import lombok.Data;
 import lombok.NonNull;
@@ -24,7 +23,7 @@ public class ZooController {
 
     @GetMapping
     public ZoosResponse getInfoAll() throws IOException, InterruptedException {
-        Zoos zoos = zooService.getZoos();
+        List<Zoo> zoos = zooService.getZoos();
         return toResponse(zoos);
     }
 
@@ -32,27 +31,17 @@ public class ZooController {
     public ZooResponse getInfoSingle(
             @PathVariable("id") String id
     ) throws IOException, InterruptedException {
-        Zoo zoo = zooService.getZoo(id);
-        ZooResponse zooResponse = toResponse(zoo);
-        return zooResponse;
+//        Zoo zoo = zooService.getZoo(id);
+//        ZooResponse zooResponse = toResponse(zoo);
+//        return zooResponse;
+        return null;
     }
 
-    private ZooResponse toResponse(Zoo zoo) {
-        return new ZooResponse(
-                zoo.getId(),
-                "This Zoo is a wonderful zoo, full of Mammals",
-                zoo.getCountry(),
-                zoo.getStreetName()
-        );
-    }
-
-    private ZoosResponse toResponse(Zoos zoos) {
-        List<ZooResponse> zooResponses = zoos.getZoos()
-                .stream()
-                .map(this::toResponse)
+    private ZoosResponse toResponse(List<Zoo> zoos) {
+        List<ZooResponse> zooResponses = zoos.stream()
+                .map(zoo -> new ZooResponse(zoo.getId(), "This Zoo is a wonderful zoo, full of Mammals", zoo.getCountry(), zoo.getStreetName()))
                 .collect(toList());
-
-        return new ZoosResponse("All known Zoos", zooResponses);
+        return new ZoosResponse("context", zooResponses);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
