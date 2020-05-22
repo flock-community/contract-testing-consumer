@@ -31,15 +31,17 @@ public class ZooController {
     public ZooResponse getInfoSingle(
             @PathVariable("id") String id
     ) throws IOException, InterruptedException {
-//        Zoo zoo = zooService.getZoo(id);
-//        ZooResponse zooResponse = toResponse(zoo);
-//        return zooResponse;
-        return null;
+        Zoo zoo = zooService.getZoo(id);
+        return toResponse(zoo);
+    }
+
+    private ZooResponse toResponse(Zoo zoo) {
+        return new ZooResponse(zoo.getId(), "This Zoo is a wonderful zoo, full of Mammals", zoo.getCountry(), zoo.getStreetName());
     }
 
     private ZoosResponse toResponse(List<Zoo> zoos) {
         List<ZooResponse> zooResponses = zoos.stream()
-                .map(zoo -> new ZooResponse(zoo.getId(), "This Zoo is a wonderful zoo, full of Mammals", zoo.getCountry(), zoo.getStreetName()))
+                .map(this::toResponse)
                 .collect(toList());
         return new ZoosResponse("context", zooResponses);
     }

@@ -41,10 +41,9 @@ public class ZooProducerHttpClient implements DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-
     }
 
-    public List<ZooDto> getZooInfo() throws IOException, InterruptedException {
+    public List<ZooDto> getZoos() throws IOException, InterruptedException {
         var uri = fromUriString(baseUrl + "/zoo").build().toUri();
 
         var request = HttpRequest.newBuilder()
@@ -57,36 +56,29 @@ public class ZooProducerHttpClient implements DisposableBean {
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
         TypeReference<List<ZooDto>> typeReference = new TypeReference<>() {};
         var zoo = objectMapper.readValue(response.body(), typeReference);
-        System.out.println(response.statusCode());
-        System.out.println(response.body());
-        System.out.println(zoo);
 
         return zoo;
     }
 
-    public ZooDto getZooInfo(String zooId) throws IOException, InterruptedException {
-        var uri = fromUriString(baseUrl + "/zoos/{zooId}").buildAndExpand(zooId).toUri();
+    public ZooDto getZoo(String zooId) throws IOException, InterruptedException {
+        var uri = fromUriString(baseUrl + "/zoo/{zooId}").buildAndExpand(zooId).toUri();
 
         var request = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(Duration.ofSeconds(5))
-                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
                 .GET()
                 .build();
 
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        var zoo = objectMapper.readValue(response.body(), ZooDto.class);
-        System.out.println(response.statusCode());
-        System.out.println(response.body());
-        System.out.println(zoo);
-
-        return zoo;
+        if (response.statusCode() == 200) {
+            return objectMapper.readValue(response.body(), ZooDto.class);
+        }
+        return null;
     }
 
     public String addMammalToZoo(String zooId, MammalRequestDTO mammalRequestDTO ){
         var uri = fromUriString(baseUrl + "/zoos/{zooId}").buildAndExpand(zooId).toUri();
-
 
         try {
             String requestBody = objectMapper.writeValueAsString(mammalRequestDTO);
@@ -104,10 +96,8 @@ public class ZooProducerHttpClient implements DisposableBean {
             return send.body();
 
         } catch (InterruptedException | IOException e) {
-            throw new RuntimeException("Coul not complete call to ZooProducer");
+            throw new RuntimeException("Could not complete call to ZooProducer");
         }
-
-
     }
 
     private void throwOnHttpError(HttpResponse<String> send) {
@@ -116,7 +106,7 @@ public class ZooProducerHttpClient implements DisposableBean {
         if (statusCode == 404){
             throw new ResourceNotFoundException("Resource not found");
         } else if ( 400 <= statusCode && statusCode <= 499){
-            throw new HttpClientErrorException(HttpStatus.valueOf(statusCode), "Client error occured: "  +send.body());
+            throw new HttpClientErrorException(HttpStatus.valueOf(statusCode), "Client error occurred: "  +send.body());
         } else if  (500 <= statusCode && statusCode <= 599) {
             throw new HttpServerErrorException(HttpStatus.valueOf(statusCode), "Server error: " );
         }

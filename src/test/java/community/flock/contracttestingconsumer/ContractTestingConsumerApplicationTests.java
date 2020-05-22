@@ -24,9 +24,15 @@ class ContractTestingConsumerApplicationTests {
 	ZooProducerHttpClient zooProducerHttpClient;
 
 	@Test
-	void test() throws IOException, InterruptedException {
-		List<ZooDto> zooInfo = zooProducerHttpClient.getZooInfo();
-		Assert.assertNotNull(zooInfo);
+	void shouldGetZoos() throws IOException, InterruptedException {
+		List<ZooDto> actualResult = zooProducerHttpClient.getZoos();
+		Assert.assertNotNull(actualResult);
+	}
+
+	@Test
+	void shouldReturn404() throws IOException, InterruptedException {
+		ZooDto actualResult = zooProducerHttpClient.getZoo("abcde");
+		Assert.assertNull(actualResult);
 	}
 
 }
